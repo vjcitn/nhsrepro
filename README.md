@@ -1,2 +1,1 @@
-# nhsrepro
-a light talk on reproducibility, requested
+cr2.Rmd
