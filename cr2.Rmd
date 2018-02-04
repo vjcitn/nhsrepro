@@ -1,0 +1,190 @@
+---
+title: "Comments on code review and reproducibility for R users at CDNM"
+author: "Vince Carey"
+output: slidy_presentation
+---
+
+
+## Learning objectives
+
+- To understand the importance of code/analysis reproducibility and effective strategies to maximize reproducibility of one's own code.
+- To learn coding "tricks" that improve efficiency (and reviewability/accuracy) for commonly used data manipulations and analysis. 
+- To understand where to seek assistance for various kinds of coding challenges and questions.
+
+## Road map
+
+- Importance of reproducibility
+- Some special features of R software
+    - functions and objects
+    - The human transcript catalog as an object
+    - The GWAS catalog as an object
+- Modalities of working with R: packages, functions, scripts ...
+- Introducing R markdown and git
+
+## National Academy of Sciences report
+
+- [linked here](https://errorstatistics.files.wordpress.com/2016/02/conceptualizing-measuring-and-studying-reproducibility.pdf)
+- describes shortfalls, possible solutions
+    - concrete reproducibility: the computations can be done by another party
+    - substantive replicability: the study protocol, repeated elsewhere on a comparable population, will yield similar inferences
+- both turn out to be costly relative to standard practice
+
+## Managing analysis software
+
+### Distinctive features of R
+
+- Functional object-oriented programming
+
+New functions can be created without variable declarations; can compose
+
+
+```{r}
+cube = function(x) x^3
+nin = function(x) cube(cube(x))
+nin(4)
+```
+
+```{r}
+4^9
+```
+
+
+
+## Objects encapsulate complexity of useful data structures
+
+
+```{r, echo=FALSE}
+suppressPackageStartupMessages({
+library(Homo.sapiens)
+library(DT)
+library(gwascat)
+})
+```
+```{r doit}
+library(Homo.sapiens) # versioned
+genes(Homo.sapiens)
+```
+##
+
+```{r}
+transcripts(Homo.sapiens)
+```
+
+## Slides can be data-dynamic
+
+```{r}
+datatable(select(Homo.sapiens, keys="BRCA2", keytype="SYMBOL", columns="GO"))
+```
+
+
+## Upshots
+
+- All computations in R result from function evaluation
+- All functions return values, but can also have side effects like writing to files
+- When a function generates a complicated value, it may be modeled as an object of a specific class, to help control the complexity of working with the result
+- Objects (like gene sets, SNP collections, GWAS hits) that will benefit large numbers of users, can be managed in packages
+    - all Bioconductor packages are versioned, managed in git
+    - all Bioconductor packages are tested nightly (changes in one package may cause trouble for another)
+    - all R packages can and should obey testing protocols (unit tests supplied, test coverage measured/high, R CMD check runs cleanly)
+- I see no reason why key findings of studies of the CDNM should not be packaged and available for programmatic access like the following
+
+##
+
+```{r}
+library(gwascat)
+data(ebicat37)
+ebicat37
+```
+
+##
+
+```{r}
+data.frame(tops=sort(table(ebicat37$`DISEASE/TRAIT`), decreasing=TRUE)[1:10])
+```
+
+
+## What is our R software like?
+
+- Packages 
+    - collect conceptually related functions
+    - define object classes to control complexity of related data elements
+    - include manual pages and vignettes to guide users through resources
+    - can be analyzed using R CMD check, installed, distributed with reliable behavior
+- Scripts
+    - attach necessary packages
+    - record references to key data resources
+    - define outputs of various kinds: listings, saved objects
+    - are plain text documents
+- R markdown documents
+    - mix narrative and code
+    - include capacity to 'cache' results of interim computations
+    - can be rendered in different formats
+    
+## Suggestions for reproducibility
+
+- Attend to provenance of code and data
+    - version of R
+    - versions of packages in use (sessionInfo())
+    - sources and versions of data in use
+    - version of script or markdown defining the key outputs
+- Use R markdown
+    - Explain what is going on
+    - Cache results of long-running computations
+    - record provenance
+- Advanced concept for reproducibility: use docker containers to encapsulate the entire software/data milieu in use
+
+##
+
+Nota bene: The R software mix underlying these "slides" is recorded below:
+
+
+```{r}
+sessionInfo()
+```
+
+
+## What is R markdown?
+
+markdown is a syntax for dividing document into code chunks and
+narrative chunks.
+
+Let's watch a [quick video](http://rmarkdown.rstudio.com/lesson-1.html).
+
+## What is git?
+
+git is a version control system for software development.
+
+It has been deployed in a browser-based user interface as changit.bwh.harvard.edu
+
+Let's watch [a quick video that emphasizes collaborative evolution of code](https://www.youtube.com/watch?v=w3jLJU7DT5E)
+
+We won't do a changit tutorial now.  But Bioinformatics group
+can strategize one based on your questions.
+
+It is an open question whether we should code collaboratively in
+the Channing lab in such a way that forks and pull requests become
+common events.
+
+However, the checkpointing processes (edit, commit, push, revert)
+can be useful for experimenting and evolving our software.
+
+## How do we increase efficiency of our R programs?
+
+- Design -- work out a strategy on paper, talk it over with colleagues
+- Modularize -- keep an eye on stages of data transformation
+    - break out repetitive tasks into functions (DRY: don't repeat yourself)
+    - keep function size to about a screenful
+- Measure -- use gc() and system.time() and profiling tools to see where resource consumption can be reduced
+
+
+```{r}
+gc()
+```
+
+
+## How do we get help?
+
+- Use existing fora: R-help, support.bioconductor.org, ChanProg
+- Prepare your questions well
+
+
